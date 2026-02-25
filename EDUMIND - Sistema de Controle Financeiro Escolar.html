@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matilde Maria Cremm — Controle Financeiro</title>
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700;900&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0d2b45; --navy-mid: #163d5e; --blue: #1a5276;
+    --teal: #12a28b; --teal-light: #e0f5f2;
+    --accent: #d4a843; --accent-light: #f5d98b;
+    --green: #1a7a4a; --green-light: #e8f8ef;
+    --red: #c0392b; --red-light: #fdecea;
+    --gray: #f4f5f7; --border: #d0d7de;
+    --text: #1a2332; --text-muted: #5a6a7a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Source Sans 3', sans-serif; background: var(--gray); color: var(--text); min-height: 100vh; }
+
+  .header {
+    background: linear-gradient(135deg, #03080c 0%, var(--navy) 50%, var(--navy-mid) 100%);
+    color: white; padding: 22px 36px;
+    display: grid; grid-template-columns: 1fr auto 1fr;
+    align-items: center; gap: 20px;
+    box-shadow: 0 4px 24px rgba(3,8,12,0.45);
+    position: relative; overflow: hidden;
+  }
+  .header::before { content:''; position:absolute; top:-50px; right:-50px; width:220px; height:220px; border:3px solid rgba(18,162,139,0.2); border-radius:50%; }
+  .header::after  { content:''; position:absolute; bottom:-70px; right:100px; width:170px; height:170px; border:2px solid rgba(18,162,139,0.1); border-radius:50%; }
+  .header-left { position:relative; z-index:1; }
+  .header-badge { font-size:10px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--teal); margin-bottom:5px; }
+  .header h1 { font-family:'Merriweather',serif; font-size:19px; font-weight:900; letter-spacing:0.4px; line-height:1.25; }
+  .header-sub { font-size:12px; color:rgba(255,255,255,0.55); margin-top:4px; letter-spacing:0.5px; }
+  .header-logo { position:relative; z-index:1; display:flex; align-items:center; justify-content:center; }
+  .header-logo svg { width:180px; height:auto; filter:drop-shadow(0 2px 8px rgba(18,162,139,0.3)); }
+  .header-right { position:relative; z-index:1; display:flex; gap:9px; justify-content:flex-end; align-items:center; flex-wrap:wrap; }
+
+  .save-indicator { font-size:11px; font-weight:600; letter-spacing:0.5px; padding:5px 12px; border-radius:20px; background:rgba(18,162,139,0.15); color:var(--teal); border:1px solid rgba(18,162,139,0.3); transition:all 0.4s; white-space:nowrap; }
+  .save-indicator.saving { background:rgba(212,168,67,0.2); color:var(--accent); border-color:rgba(212,168,67,0.4); }
+  .save-indicator.saved  { background:rgba(26,122,74,0.2); color:#2ecc71; border-color:rgba(26,122,74,0.4); }
+
+  .btn { padding:9px 18px; border:none; border-radius:6px; font-family:'Source Sans 3',sans-serif; font-weight:700; font-size:12px; cursor:pointer; transition:all 0.2s; letter-spacing:0.3px; display:inline-flex; align-items:center; gap:6px; }
+  .btn-teal   { background:var(--teal); color:white; } .btn-teal:hover { background:#0e8872; transform:translateY(-1px); }
+  .btn-accent { background:var(--accent); color:var(--navy); } .btn-accent:hover { background:var(--accent-light); }
+  .btn-outline { background:transparent; color:white; border:2px solid rgba(255,255,255,0.35); } .btn-outline:hover { background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.7); }
+  .btn-green  { background:var(--green); color:white; } .btn-green:hover { background:#145f39; }
+  .btn-red    { background:var(--red); color:white; } .btn-red:hover { background:#a93226; }
+  .btn-ghost  { background:transparent; color:var(--text-muted); border:1.5px solid var(--border); } .btn-ghost:hover { background:var(--gray); }
+  .btn-sm { padding:6px 12px; font-size:11px; }
+
+  .account-bar { background:#03080c; padding:0 36px; display:flex; align-items:center; border-bottom:2px solid var(--teal); }
+  .acc-label { font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--teal); padding:12px 16px 12px 0; white-space:nowrap; }
+  .acc-tabs  { display:flex; gap:0; overflow-x:auto; flex:1; scrollbar-width:none; }
+  .acc-tabs::-webkit-scrollbar { display:none; }
+  .acc-tab { padding:12px 20px; font-size:12px; font-weight:600; color:rgba(255,255,255,0.5); cursor:pointer; border:none; background:transparent; font-family:'Source Sans 3',sans-serif; border-bottom:3px solid transparent; margin-bottom:-2px; white-space:nowrap; transition:all 0.2s; display:flex; flex-direction:column; align-items:flex-start; gap:1px; }
+  .acc-tab:hover { color:rgba(255,255,255,0.85); background:rgba(18,162,139,0.08); }
+  .acc-tab.active { color:var(--teal); border-bottom-color:var(--teal); background:rgba(18,162,139,0.12); }
+  .acc-tab .acc-num { font-size:10px; opacity:0.65; }
+  .acc-add-btn { background:rgba(18,162,139,0.1); border:none; color:var(--teal); font-size:16px; width:38px; height:38px; border-radius:6px; cursor:pointer; margin-left:8px; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .acc-add-btn:hover { background:rgba(18,162,139,0.25); }
+
+  .content { padding:24px 36px; max-width:1400px; margin:0 auto; }
+
+  .kpi-section { margin-bottom:24px; }
+  .kpi-section-title { font-family:'Merriweather',serif; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:var(--text-muted); margin-bottom:12px; }
+  .kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(185px,1fr)); gap:13px; }
+  .kpi-card { background:white; border-radius:10px; padding:17px 19px; border-left:5px solid var(--border); box-shadow:0 2px 8px rgba(0,0,0,0.05); transition:box-shadow 0.2s; }
+  .kpi-card:hover { box-shadow:0 4px 16px rgba(0,0,0,0.09); }
+  .kpi-card.entrada   { border-left-color:var(--green); }
+  .kpi-card.saida     { border-left-color:var(--red); }
+  .kpi-card.saldo-pos { border-left-color:var(--teal); }
+  .kpi-card.saldo-neg { border-left-color:var(--red); }
+  .kpi-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted); margin-bottom:7px; }
+  .kpi-value { font-family:'Merriweather',serif; font-size:23px; font-weight:700; line-height:1; }
+  .kpi-card.entrada   .kpi-value { color:var(--green); }
+  .kpi-card.saida     .kpi-value { color:var(--red); }
+  .kpi-card.saldo-pos .kpi-value { color:var(--teal); }
+  .kpi-card.saldo-neg .kpi-value { color:var(--red); }
+  .kpi-sub { font-size:11px; color:var(--text-muted); margin-top:4px; }
+
+  .programs-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(245px,1fr)); gap:13px; }
+  .prog-card { background:white; border-radius:10px; padding:15px 17px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border-top:4px solid var(--teal); }
+  .prog-name { font-weight:700; font-size:13px; color:var(--navy); margin-bottom:10px; line-height:1.3; }
+  .prog-bar-wrap { margin-bottom:8px; }
+  .prog-bar-label { display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted); margin-bottom:3px; }
+  .prog-bar-track { height:7px; background:var(--gray); border-radius:10px; overflow:hidden; }
+  .prog-bar-fill  { height:100%; border-radius:10px; transition:width 0.5s; }
+  .prog-numbers   { display:flex; justify-content:space-between; }
+  .prog-num { font-size:11px; }
+  .prog-num span { display:block; font-size:13px; font-weight:700; }
+  .prog-num.e span { color:var(--green); } .prog-num.s span { color:var(--red); }
+
+  .panels { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:24px; }
+  @media(max-width:900px) { .panels { grid-template-columns:1fr; } }
+  .panel { background:white; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.05); overflow:hidden; }
+  .panel-header { padding:13px 18px; display:flex; align-items:center; }
+  .panel-header.green { background:var(--green); color:white; }
+  .panel-header.red   { background:var(--red); color:white; }
+  .panel-header h3 { font-family:'Merriweather',serif; font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px; }
+  .panel-body { padding:17px; }
+  .form-row   { display:grid; gap:10px; margin-bottom:10px; }
+  .form-row-2 { grid-template-columns:1fr 1fr; }
+  label { font-size:11px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:3px; text-transform:uppercase; letter-spacing:0.5px; }
+  input, select { width:100%; padding:8px 11px; border:2px solid var(--border); border-radius:6px; font-family:'Source Sans 3',sans-serif; font-size:13px; color:var(--text); transition:border-color 0.2s; background:white; }
+  input:focus, select:focus { outline:none; border-color:var(--teal); }
+
+  .table-section { background:white; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.05); overflow:hidden; margin-bottom:24px; }
+  .table-header { padding:15px 22px; background:#03080c; color:white; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+  .table-header h3 { font-family:'Merriweather',serif; font-size:15px; font-weight:700; }
+  .filter-sel { background:rgba(18,162,139,0.15); color:rgba(255,255,255,0.85); border:1px solid rgba(18,162,139,0.4); border-radius:5px; padding:6px 10px; font-size:11px; font-family:'Source Sans 3',sans-serif; }
+  table { width:100%; border-collapse:collapse; font-size:12px; }
+  thead th { background:var(--gray); padding:10px 13px; text-align:left; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); border-bottom:2px solid var(--border); white-space:nowrap; }
+  tbody tr { border-bottom:1px solid var(--border); transition:background 0.15s; }
+  tbody tr:hover { background:#f8f9fb; }
+  tbody td { padding:10px 13px; vertical-align:middle; }
+  .tag { display:inline-block; padding:2px 8px; border-radius:20px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; }
+  .tag-entrada { background:var(--green-light); color:var(--green); }
+  .tag-saida   { background:var(--red-light);   color:var(--red); }
+  .val-entrada { color:var(--green); font-weight:700; } .val-saida { color:var(--red); font-weight:700; }
+  .del-btn { background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:15px; padding:3px 5px; border-radius:4px; transition:all 0.2s; }
+  .del-btn:hover { color:var(--red); background:var(--red-light); }
+  .empty-row td { text-align:center; color:var(--text-muted); padding:28px; font-style:italic; }
+  .badge-ano { display:inline-block; background:var(--navy); color:white; border-radius:4px; font-size:10px; font-weight:700; padding:2px 6px; }
+  .table-foot { padding:10px 22px; background:var(--gray); border-top:1px solid var(--border); font-size:11px; color:var(--text-muted); display:flex; justify-content:space-between; }
+
+  /* MODAL */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(3,8,12,0.65); z-index:1000; align-items:center; justify-content:center; }
+  .modal-overlay.open { display:flex; }
+  .modal { background:white; border-radius:12px; width:510px; max-width:95vw; box-shadow:0 20px 60px rgba(0,0,0,0.35); overflow:hidden; }
+  .modal-wide { width:580px; }
+  .modal-head { padding:17px 22px; display:flex; justify-content:space-between; align-items:center; color:white; }
+  .modal-head.green { background:var(--green); } .modal-head.red { background:var(--red); }
+  .modal-head.navy  { background:#03080c; }      .modal-head.teal { background:var(--teal); }
+  .modal-head h3 { font-family:'Merriweather',serif; font-size:16px; }
+  .modal-close { background:rgba(255,255,255,0.2); border:none; color:white; width:28px; height:28px; border-radius:50%; cursor:pointer; font-size:17px; display:flex; align-items:center; justify-content:center; }
+  .modal-body { padding:22px; max-height:70vh; overflow-y:auto; }
+  .modal-foot { padding:14px 22px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:9px; }
+
+  .acc-list-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border:1.5px solid var(--border); border-radius:8px; margin-bottom:8px; background:white; transition:border-color 0.2s; }
+  .acc-list-item:hover { border-color:var(--teal); }
+  .acc-list-item.active-item { border-color:var(--teal); background:var(--teal-light); }
+  .acc-list-item-info { flex:1; }
+  .acc-list-item-name { font-weight:700; font-size:13px; color:var(--text); }
+  .acc-list-item-num  { font-size:11px; color:var(--text-muted); margin-top:1px; }
+  .acc-list-item-saldo { font-size:12px; font-weight:700; color:var(--teal); margin-top:2px; }
+  .acc-actions { display:flex; gap:6px; }
+  .acc-edit-btn { background:none; border:1.5px solid var(--border); color:var(--text-muted); padding:4px 9px; border-radius:5px; cursor:pointer; font-size:12px; transition:all 0.2s; }
+  .acc-edit-btn:hover { border-color:var(--teal); color:var(--teal); }
+  .acc-del-btn  { background:none; border:1.5px solid var(--border); color:var(--text-muted); padding:4px 9px; border-radius:5px; cursor:pointer; font-size:12px; transition:all 0.2s; }
+  .acc-del-btn:hover { border-color:var(--red); color:var(--red); }
+  .add-conta-section { border-top:1.5px dashed var(--border); margin-top:14px; padding-top:14px; }
+  .add-conta-title { font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
+
+  .footer { background:#03080c; color:rgba(255,255,255,0.4); text-align:center; padding:15px; font-size:11px; letter-spacing:0.5px; border-top:1px solid var(--teal); }
+  .footer strong { color:var(--teal); }
+
+  .toast { position:fixed; bottom:24px; right:24px; z-index:9999; background:#03080c; color:white; padding:12px 20px; border-radius:8px; font-size:13px; font-weight:600; border-left:4px solid var(--teal); box-shadow:0 8px 24px rgba(0,0,0,0.3); transform:translateY(80px); opacity:0; transition:all 0.3s; pointer-events:none; }
+  .toast.show { transform:translateY(0); opacity:1; }
+
+  @media print {
+    .account-bar,.panels,.header-right,.del-btn,.filter-sel,.acc-add-btn,.save-indicator,.toast { display:none!important; }
+    body { background:white; }
+    .header { background:white!important; color:black!important; padding:10px; }
+    .header h1,.header-badge,.header-sub { color:black!important; }
+    .table-header { background:var(--navy)!important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="header-badge">📋 Sistema de Controle Financeiro Escolar</div>
+    <h1>Matilde Maria Cremm</h1>
+    <div class="header-sub">Prestação de Contas — PDDE / Programas Federais</div>
+  </div>
+  <div class="header-logo">
+    <svg viewBox="0 0 775 140" xmlns="http://www.w3.org/2000/svg">
+      <path fill="#f4f5f9" d="M 16.88 14.00 C 44.58 14.00 72.28 13.99 99.98 14.01 C 99.98 20.92 99.98 27.83 99.97 34.75 C 80.71 34.74 61.45 34.76 42.19 34.74 C 42.20 58.74 42.19 82.74 42.20 106.74 C 62.04 106.75 81.89 106.75 101.74 106.74 C 101.74 113.66 101.75 120.57 101.75 127.49 C 73.46 127.51 45.18 127.50 16.89 127.49 C 16.85 89.66 16.88 51.83 16.88 14.00 Z"/>
+      <path fill="#f4f5f9" d="M 122.24 13.75 C 141.08 14.16 160.02 12.84 178.80 14.59 C 196.78 16.92 213.18 29.10 220.04 45.96 C 227.14 63.93 226.50 85.46 216.10 102.05 C 206.78 117.16 189.41 125.98 171.97 127.09 C 155.42 127.99 138.81 127.28 122.24 127.49 C 122.25 89.58 122.25 51.66 122.24 13.75 M 147.56 35.00 C 147.57 58.75 147.56 82.50 147.57 106.25 C 156.32 106.01 165.14 106.82 173.85 105.68 C 184.03 104.33 192.39 96.39 196.04 87.04 C 202.26 70.74 198.81 48.63 182.93 39.10 C 172.19 32.86 159.34 35.61 147.56 35.00 Z"/>
+      <path fill="#f4f5f9" d="M 240.57 13.77 C 249.05 13.73 257.53 13.76 266.02 13.74 C 266.03 35.50 266.02 57.25 266.02 79.01 C 266.01 85.96 267.64 93.30 272.26 98.69 C 281.10 109.49 300.25 108.59 308.19 97.16 C 311.90 91.89 313.15 85.32 313.09 78.98 C 313.11 57.24 313.09 35.49 313.10 13.75 C 321.53 13.76 329.97 13.73 338.41 13.76 C 338.39 35.84 338.44 57.91 338.39 79.99 C 338.36 91.14 335.54 102.64 328.68 111.60 C 320.06 122.69 305.82 128.45 291.97 128.41 C 278.37 129.20 264.16 125.41 254.13 115.87 C 244.77 106.93 240.73 93.67 240.61 80.98 C 240.51 58.58 240.59 36.17 240.57 13.77 Z"/>
+      <path fill="#f4f5f9" d="M 359.12 13.75 C 368.61 13.78 378.11 13.68 387.60 13.81 C 397.63 37.39 407.87 60.88 417.98 84.42 C 429.85 60.92 441.47 37.30 453.24 13.76 C 460.30 13.75 467.36 13.74 474.43 13.76 C 458.49 47.79 442.31 81.71 426.32 115.72 C 420.79 115.78 415.26 115.77 409.73 115.73 C 400.33 92.99 391.07 70.19 381.55 47.50 C 381.47 74.08 381.54 100.67 381.52 127.25 C 374.05 127.25 366.58 127.25 359.12 127.25 C 359.13 89.41 359.12 51.58 359.12 13.75 Z"/>
+      <path fill="#f4f5f9" d="M 499.67 13.81 C 508.16 13.86 516.66 13.82 525.16 13.84 C 525.14 51.70 525.13 89.56 525.17 127.42 C 516.65 127.44 508.13 127.37 499.62 127.46 C 499.73 89.57 499.64 51.69 499.67 13.81 Z"/>
+      <path fill="#f4f5f9" d="M 547.68 13.76 C 555.26 14.16 563.36 12.90 570.61 14.37 C 596.03 51.89 620.96 89.80 646.14 127.50 C 637.44 127.50 628.75 127.50 620.05 127.49 C 603.78 102.89 587.69 78.17 571.37 53.60 C 571.35 78.23 571.37 102.86 571.36 127.49 C 563.46 127.50 555.57 127.50 547.67 127.50 C 547.69 89.58 547.69 51.67 547.68 13.76 Z"/>
+      <path fill="#f4f5f9" d="M 622.65 13.77 C 630.50 13.73 638.34 13.75 646.18 13.76 C 646.14 43.03 646.22 72.31 646.14 101.59 C 631.53 92.23 620.70 74.73 622.64 57.00 C 622.65 42.59 622.61 28.18 622.65 13.77 Z"/>
+      <path fill="#f4f5f9" d="M 668.59 13.77 C 686.42 13.97 704.28 13.24 722.09 14.19 C 740.56 15.68 758.08 27.27 765.65 44.34 C 774.78 65.19 772.73 91.80 757.12 109.08 C 745.87 121.74 728.59 127.41 712.00 127.48 C 697.52 127.52 683.05 127.50 668.58 127.49 C 668.58 89.58 668.56 51.67 668.59 13.77 M 693.90 35.01 C 693.90 58.75 693.88 82.50 693.91 106.24 C 705.30 105.63 717.48 108.17 728.20 103.19 C 750.79 90.75 751.01 53.04 729.66 39.32 C 718.86 32.83 705.82 35.59 693.90 35.01 Z"/>
+      <path fill="#12a28b" d="M 63.28 60.39 C 73.68 60.40 84.08 60.41 94.48 60.41 C 94.40 67.29 94.42 74.17 94.47 81.05 C 82.37 81.41 70.26 81.22 58.16 81.17 C 59.81 74.23 61.54 67.31 63.28 60.39 Z"/>
+      <path fill="#f4f5f9" d="M 454.63 77.99 C 459.05 65.98 466.22 54.48 476.70 46.86 C 476.86 73.65 476.71 100.45 476.77 127.25 C 469.41 127.24 462.05 127.26 454.69 127.23 C 454.72 110.82 454.44 94.40 454.63 77.99 Z"/>
+    </svg>
+  </div>
+  <div class="header-right">
+    <span class="save-indicator" id="save-status">💾 Dados salvos</span>
+    <button class="btn btn-outline" onclick="window.print()">🖨️ Gerar PDF</button>
+    <button class="btn btn-teal"    onclick="openModal('entrada')">＋ Entrada</button>
+    <button class="btn btn-outline" style="border-color:rgba(192,57,43,0.5);color:#ff9999;" onclick="openModal('saida')">＋ Saída</button>
+  </div>
+</div>
+
+<div class="account-bar">
+  <div class="acc-label">📁 Conta:</div>
+  <div class="acc-tabs" id="acc-tabs"></div>
+  <button class="acc-add-btn" onclick="openModal('gerenciarContas')" title="Gerenciar contas">⚙️</button>
+</div>
+
+<div class="content">
+  <div class="kpi-section">
+    <div class="kpi-section-title">Visão Geral — Fluxo de Caixa</div>
+    <div class="kpi-grid">
+      <div class="kpi-card entrada">    <div class="kpi-label">💰 Total Recebido</div><div class="kpi-value" id="kpi-entrada">R$ 0,00</div><div class="kpi-sub" id="kpi-entrada-count">0 aportes</div></div>
+      <div class="kpi-card saida">      <div class="kpi-label">💸 Total Gasto</div>  <div class="kpi-value" id="kpi-saida">R$ 0,00</div>  <div class="kpi-sub" id="kpi-saida-count">0 despesas</div></div>
+      <div class="kpi-card saldo-pos" id="kpi-saldo-card"><div class="kpi-label">📊 Saldo Disponível</div><div class="kpi-value" id="kpi-saldo">R$ 0,00</div><div class="kpi-sub" id="kpi-saldo-pct">—</div></div>
+      <div class="kpi-card" style="border-left-color:var(--navy)"><div class="kpi-label">🏫 Programas Ativos</div><div class="kpi-value" id="kpi-programas" style="color:var(--navy)">0</div><div class="kpi-sub">com movimentações</div></div>
+    </div>
+  </div>
+
+  <div class="kpi-section">
+    <div class="kpi-section-title">Saldo por Programa (Verba)</div>
+    <div class="programs-grid" id="programs-grid"><div style="color:var(--text-muted);font-style:italic;font-size:13px;padding:8px 0;">Nenhum programa nesta conta ainda.</div></div>
+  </div>
+
+  <div class="panels">
+    <div class="panel">
+      <div class="panel-header green"><h3>💰 Nova Entrada</h3></div>
+      <div class="panel-body">
+        <div class="form-row form-row-2">
+          <div><label>Ano</label><select id="f-entrada-ano"><option>2025</option><option>2026</option><option>2027</option></select></div>
+          <div><label>Data</label><input type="date" id="f-entrada-data"></div>
+        </div>
+        <div class="form-row"><label>Programa / Verba</label><input type="text" id="f-entrada-prog" placeholder="Ex: PDDE Manutenção" list="programas-list"><datalist id="programas-list"></datalist></div>
+        <div class="form-row"><label>Valor Recebido (R$)</label><input type="number" id="f-entrada-valor" step="0.01" min="0" placeholder="0,00"></div>
+        <button class="btn btn-green" onclick="addEntrada()" style="width:100%;justify-content:center;margin-top:4px;">＋ Registrar Entrada</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header red"><h3>💸 Nova Saída</h3></div>
+      <div class="panel-body">
+        <div class="form-row form-row-2">
+          <div><label>Data</label><input type="date" id="f-saida-data"></div>
+          <div><label>Debitar de (Verba)</label><select id="f-saida-prog"><option value="">— Selecione —</option></select></div>
+        </div>
+        <div class="form-row"><label>Fornecedor</label><input type="text" id="f-saida-forn" placeholder="Nome do fornecedor"></div>
+        <div class="form-row"><label>Descrição / Itens</label><input type="text" id="f-saida-desc" placeholder="Ex: Material para pintura"></div>
+        <div class="form-row form-row-2">
+          <div><label>Valor Pago (R$)</label><input type="number" id="f-saida-valor" step="0.01" min="0" placeholder="0,00"></div>
+          <div><label>Imposto (R$)</label><input type="number" id="f-saida-imposto" step="0.01" min="0" placeholder="0,00"></div>
+        </div>
+        <button class="btn btn-red" onclick="addSaida()" style="width:100%;justify-content:center;margin-top:4px;">＋ Registrar Saída</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-section">
+    <div class="table-header">
+      <h3>📄 Movimentações — <span id="conta-ativa-label" style="color:var(--teal)"></span></h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <select id="filter-ano"  class="filter-sel" onchange="renderTable()"><option value="">Todos os anos</option><option>2025</option><option>2026</option><option>2027</option></select>
+        <select id="filter-prog" class="filter-sel" onchange="renderTable()"><option value="">Todos os programas</option></select>
+        <select id="filter-tipo" class="filter-sel" onchange="renderTable()"><option value="">Entrada e Saída</option><option value="entrada">Só Entradas</option><option value="saida">Só Saídas</option></select>
+      </div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead><tr>
+          <th>Ano</th><th>Data</th><th>Tipo</th><th>Programa / Verba</th>
+          <th>Fornecedor</th><th>Descrição</th><th>Entrada (R$)</th>
+          <th>Saída (R$)</th><th>Imposto (R$)</th><th></th>
+        </tr></thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+    <div class="table-foot"><span id="table-count">0 registros</span><span>Saldo = Total entradas − Total saídas</span></div>
+  </div>
+</div>
+
+<div class="footer"><strong>Matilde Maria Cremm</strong> · Sistema de Controle Financeiro — Programa Desenvolvido por -  EDUMIND - Inovação Educacional </div> 
+<div class="toast" id="toast"></div>
+
+<!-- MODAL ENTRADA -->
+<div class="modal-overlay" id="modal-entrada">
+  <div class="modal">
+    <div class="modal-head green"><h3>💰 Registrar Nova Entrada</h3><button class="modal-close" onclick="closeModal('entrada')">×</button></div>
+    <div class="modal-body">
+      <div class="form-row form-row-2">
+        <div><label>Ano</label><select id="m-entrada-ano"><option>2025</option><option>2026</option><option>2027</option></select></div>
+        <div><label>Data</label><input type="date" id="m-entrada-data"></div>
+      </div>
+      <div class="form-row"><label>Programa / Verba</label><input type="text" id="m-entrada-prog" placeholder="Ex: PDDE Manutenção" list="programas-list2"><datalist id="programas-list2"></datalist></div>
+      <div class="form-row"><label>Valor Recebido (R$)</label><input type="number" id="m-entrada-valor" step="0.01" min="0" placeholder="0,00"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('entrada')">Cancelar</button>
+      <button class="btn btn-green" onclick="addEntradaModal()">＋ Registrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SAÍDA -->
+<div class="modal-overlay" id="modal-saida">
+  <div class="modal">
+    <div class="modal-head red"><h3>💸 Registrar Nova Saída</h3><button class="modal-close" onclick="closeModal('saida')">×</button></div>
+    <div class="modal-body">
+      <div class="form-row form-row-2">
+        <div><label>Data</label><input type="date" id="m-saida-data"></div>
+        <div><label>Debitar de (Verba)</label><select id="m-saida-prog"><option value="">— Selecione —</option></select></div>
+      </div>
+      <div class="form-row"><label>Fornecedor</label><input type="text" id="m-saida-forn" placeholder="Nome do fornecedor"></div>
+      <div class="form-row"><label>Descrição / Itens</label><input type="text" id="m-saida-desc" placeholder="Ex: Material para pintura"></div>
+      <div class="form-row form-row-2">
+        <div><label>Valor Pago (R$)</label><input type="number" id="m-saida-valor" step="0.01" min="0" placeholder="0,00"></div>
+        <div><label>Imposto (R$)</label><input type="number" id="m-saida-imposto" step="0.01" min="0" placeholder="0,00"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('saida')">Cancelar</button>
+      <button class="btn btn-red" onclick="addSaidaModal()">＋ Registrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GERENCIAR CONTAS -->
+<div class="modal-overlay" id="modal-gerenciarContas">
+  <div class="modal modal-wide">
+    <div class="modal-head navy"><h3>⚙️ Gerenciar Contas</h3><button class="modal-close" onclick="closeModal('gerenciarContas')">×</button></div>
+    <div class="modal-body">
+      <div id="acc-list-render"></div>
+      <div class="add-conta-section">
+        <div class="add-conta-title">➕ Adicionar Nova Conta</div>
+        <div class="form-row form-row-2">
+          <div><label>Nome da Conta</label><input type="text" id="nova-conta-nome" placeholder="Ex: Conta Alimentação"></div>
+          <div><label>Número da Conta</label><input type="text" id="nova-conta-num" placeholder="Ex: 126025-5"></div>
+        </div>
+        <button class="btn btn-teal btn-sm" onclick="addConta()">➕ Adicionar Conta</button>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('gerenciarContas')">Fechar</button></div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR CONTA -->
+<div class="modal-overlay" id="modal-editarConta">
+  <div class="modal">
+    <div class="modal-head teal"><h3>✏️ Editar Conta</h3><button class="modal-close" onclick="closeModal('editarConta')">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-conta-id">
+      <div class="form-row"><label>Nome da Conta</label><input type="text" id="edit-conta-nome" placeholder="Nome da conta"></div>
+      <div class="form-row"><label>Número da Conta</label><input type="text" id="edit-conta-num" placeholder="Ex: 126020-0"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('editarConta')">Cancelar</button>
+      <button class="btn btn-teal" onclick="saveEditConta()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// LOCALSTORAGE KEY
+// ═══════════════════════════════════════════════════════
+const LS_KEY = 'matilde_cremm_v2';
+
+const DEFAULT_STATE = {
+  contas: [
+    { id:'c1', numero:'126020-0', nome:'Conta Principal' },
+    { id:'c2', numero:'126021-1', nome:'Conta Secundária' },
+    { id:'c3', numero:'126022-2', nome:'Conta Manutenção' },
+    { id:'c4', numero:'126023-3', nome:'Conta Projetos' },
+    { id:'c5', numero:'126024-4', nome:'Conta Reserva' },
+  ],
+  data: {
+    c1:[
+      {id:1,ano:2025,data:'2025-04-30',tipo:'entrada',programa:'PDDE Ensino Médio Profissional',fornecedor:'',descricao:'Aporte recebido',valor:1437.50,imposto:0},
+      {id:2,ano:2025,data:'2025-06-20',tipo:'entrada',programa:'PDDE Dignidade Íntima',fornecedor:'',descricao:'Aporte recebido',valor:2887.20,imposto:0},
+      {id:3,ano:2025,data:'2025-02-28',tipo:'entrada',programa:'PDDE Manutenção',fornecedor:'',descricao:'Aporte recebido',valor:1772.01,imposto:0},
+      {id:4,ano:2026,data:'2025-06-27',tipo:'entrada',programa:'PDDE Manutenção',fornecedor:'',descricao:'Aporte recebido',valor:13412.00,imposto:0},
+      {id:5,ano:2026,data:'2025-06-27',tipo:'entrada',programa:'PDDE Manutenção',fornecedor:'',descricao:'Aporte recebido',valor:34600.00,imposto:0},
+      {id:6,ano:2026,data:'2026-01-26',tipo:'saida',programa:'PDDE Manutenção',fornecedor:'CCM Tintas Auto e Resid Ltda-ME',descricao:'Material para pintura',valor:5179.50,imposto:0},
+      {id:7,ano:2026,data:'2026-01-26',tipo:'saida',programa:'PDDE Manutenção',fornecedor:'João Batista Domingos Damas',descricao:'Capinagem das áreas verdes',valor:3150.00,imposto:0},
+      {id:8,ano:2026,data:'2026-01-30',tipo:'saida',programa:'PDDE Manutenção',fornecedor:'CCM Tintas Auto e Resid Ltda-ME',descricao:'Tintas e materiais para pintura',valor:1024.90,imposto:0},
+      {id:9,ano:2026,data:'2026-02-12',tipo:'saida',programa:'PDDE Manutenção',fornecedor:'CCM Tintas Auto e Resid Ltda-ME',descricao:'Tinta',valor:1271.20,imposto:0},
+      {id:10,ano:2026,data:'2026-02-13',tipo:'saida',programa:'PDDE Manutenção',fornecedor:'CGM Com, Instalações e Serviços Ltda',descricao:'Pintura e Manutenção dos banheiros',valor:24615.20,imposto:4384.80},
+    ],
+    c2:[],c3:[],c4:[],c5:[]
+  },
+  nextIds:{c1:11,c2:1,c3:1,c4:1,c5:1},
+  currentConta:'c1'
+};
+
+let state;
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    state = raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(DEFAULT_STATE));
+  } catch(e) {
+    state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+  }
+}
+
+let saveTimer=null;
+function saveState() {
+  const el=document.getElementById('save-status');
+  el.textContent='⏳ Salvando...'; el.className='save-indicator saving';
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>{
+    try {
+      localStorage.setItem(LS_KEY,JSON.stringify(state));
+      el.textContent='✅ Salvo automaticamente'; el.className='save-indicator saved';
+      setTimeout(()=>{ el.textContent='💾 Dados salvos'; el.className='save-indicator'; },2500);
+    } catch(e) {
+      el.textContent='⚠️ Erro ao salvar'; el.className='save-indicator';
+    }
+  },400);
+}
+
+// ═══════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════
+const fmt   = v => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const today = () => new Date().toISOString().split('T')[0];
+const getTx  = () => state.data[state.currentConta]||[];
+const getConta=()=> state.contas.find(c=>c.id===state.currentConta);
+
+function getPrograms(cid) {
+  const progs={};
+  (state.data[cid]||[]).forEach(t=>{
+    if(!progs[t.programa]) progs[t.programa]={entrada:0,saida:0};
+    if(t.tipo==='entrada') progs[t.programa].entrada+=t.valor;
+    else progs[t.programa].saida+=(t.valor+(t.imposto||0));
+  });
+  return progs;
+}
+
+function updateDataLists() {
+  const progs=Object.keys(getPrograms(state.currentConta));
+  ['programas-list','programas-list2'].forEach(id=>{
+    const dl=document.getElementById(id);
+    if(dl) dl.innerHTML=progs.map(p=>`<option value="${p}">`).join('');
+  });
+  ['f-saida-prog','m-saida-prog','filter-prog'].forEach(id=>{
+    const sel=document.getElementById(id); if(!sel) return;
+    const cur=sel.value;
+    sel.innerHTML=(id==='filter-prog'?'<option value="">Todos os programas</option>':'<option value="">— Selecione —</option>')+progs.map(p=>`<option value="${p}">${p}</option>`).join('');
+    sel.value=cur;
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER TABS
+// ═══════════════════════════════════════════════════════
+function renderTabs() {
+  const container=document.getElementById('acc-tabs');
+  container.innerHTML=state.contas.map(c=>{
+    const p=getPrograms(c.id);
+    const e=Object.values(p).reduce((a,v)=>a+v.entrada,0);
+    const s=Object.values(p).reduce((a,v)=>a+v.saida,0);
+    const sd=e-s;
+    const str=e>0?` · ${fmt(sd)}`:'';
+    return `<button class="acc-tab ${c.id===state.currentConta?'active':''}" onclick="switchConta('${c.id}')">
+      ${c.nome}${str}<span class="acc-num">Nº ${c.numero}</span>
+    </button>`;
+  }).join('');
+  const cc=getConta();
+  document.getElementById('conta-ativa-label').textContent=cc?`${cc.numero} — ${cc.nome}`:'';
+}
+
+function switchConta(id) {
+  state.currentConta=id; saveState(); refresh();
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER KPIs
+// ═══════════════════════════════════════════════════════
+function renderKPIs() {
+  const tx=getTx();
+  const ent=tx.filter(t=>t.tipo==='entrada');
+  const sai=tx.filter(t=>t.tipo==='saida');
+  const totalE=ent.reduce((a,t)=>a+t.valor,0);
+  const totalS=sai.reduce((a,t)=>a+t.valor+(t.imposto||0),0);
+  const saldo=totalE-totalS;
+  document.getElementById('kpi-entrada').textContent=fmt(totalE);
+  document.getElementById('kpi-entrada-count').textContent=`${ent.length} aportes`;
+  document.getElementById('kpi-saida').textContent=fmt(totalS);
+  document.getElementById('kpi-saida-count').textContent=`${sai.length} despesas`;
+  document.getElementById('kpi-saldo').textContent=fmt(saldo);
+  const card=document.getElementById('kpi-saldo-card');
+  card.className='kpi-card '+(saldo>=0?'saldo-pos':'saldo-neg');
+  const pct=totalE>0?((totalS/totalE)*100).toFixed(1):0;
+  document.getElementById('kpi-saldo-pct').textContent=`${pct}% da verba utilizada`;
+  const progs=getPrograms(state.currentConta);
+  document.getElementById('kpi-programas').textContent=Object.keys(progs).length;
+  const grid=document.getElementById('programs-grid');
+  if(!Object.keys(progs).length){ grid.innerHTML='<div style="color:var(--text-muted);font-style:italic;font-size:13px;padding:8px 0;">Nenhum programa nesta conta ainda.</div>'; return; }
+  const colors=['#12a28b','#1a5276','#1a7a4a','#7d6608','#6e2f8f','#943126','#0e6655','#1a4a7a'];
+  grid.innerHTML=Object.entries(progs).map(([nome,v],i)=>{
+    const sp=v.entrada-v.saida;
+    const pu=v.entrada>0?Math.min((v.saida/v.entrada)*100,100):0;
+    const cor=colors[i%colors.length];
+    return `<div class="prog-card" style="border-top-color:${cor}">
+      <div class="prog-name" style="color:${cor}">${nome}</div>
+      <div class="prog-bar-wrap">
+        <div class="prog-bar-label"><span>Utilizado</span><span>${pu.toFixed(1)}%</span></div>
+        <div class="prog-bar-track"><div class="prog-bar-fill" style="width:${pu}%;background:${pu>=100?'var(--red)':cor}"></div></div>
+      </div>
+      <div class="prog-numbers">
+        <div class="prog-num e"><span>${fmt(v.entrada)}</span>Recebido</div>
+        <div class="prog-num s"><span>${fmt(v.saida)}</span>Gasto</div>
+        <div class="prog-num b"><span style="color:${sp>=0?cor:'var(--red)'}">${fmt(sp)}</span>Saldo</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER TABLE
+// ═══════════════════════════════════════════════════════
+function renderTable() {
+  const fA=document.getElementById('filter-ano').value;
+  const fP=document.getElementById('filter-prog').value;
+  const fT=document.getElementById('filter-tipo').value;
+  let fl=getTx().filter(t=>{
+    if(fA&&String(t.ano)!==fA) return false;
+    if(fP&&t.programa!==fP)    return false;
+    if(fT&&t.tipo!==fT)        return false;
+    return true;
+  }).sort((a,b)=>a.data.localeCompare(b.data));
+  const tbody=document.getElementById('table-body');
+  if(!fl.length){ tbody.innerHTML='<tr class="empty-row"><td colspan="10">Nenhuma movimentação encontrada.</td></tr>'; document.getElementById('table-count').textContent='0 registros'; return; }
+  tbody.innerHTML=fl.map(t=>{
+    const df=t.data?t.data.split('-').reverse().join('/'):'—';
+    const isE=t.tipo==='entrada';
+    return `<tr>
+      <td><span class="badge-ano">${t.ano}</span></td>
+      <td>${df}</td>
+      <td><span class="tag ${isE?'tag-entrada':'tag-saida'}">${isE?'↑ Entrada':'↓ Saída'}</span></td>
+      <td style="font-weight:600;font-size:11px;">${t.programa}</td>
+      <td style="font-size:11px;color:var(--text-muted)">${t.fornecedor||'—'}</td>
+      <td style="font-size:11px;">${t.descricao}</td>
+      <td class="${isE?'val-entrada':''}">${isE?fmt(t.valor):'—'}</td>
+      <td class="${!isE?'val-saida':''}">${!isE?fmt(t.valor):'—'}</td>
+      <td style="color:var(--text-muted);font-size:11px;">${t.imposto>0?fmt(t.imposto):'—'}</td>
+      <td><button class="del-btn" onclick="deleteTx(${t.id})" title="Excluir">🗑</button></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('table-count').textContent=`${fl.length} registros`;
+}
+
+// ═══════════════════════════════════════════════════════
+// ADD / DELETE TX
+// ═══════════════════════════════════════════════════════
+function _checkSaldo(prog,valor,imposto){
+  const p=getPrograms(state.currentConta);
+  const sp=(p[prog]?.entrada||0)-(p[prog]?.saida||0);
+  if(valor+imposto>sp) return confirm(`⚠️ Esta despesa de ${fmt(valor+imposto)} supera o saldo de ${fmt(sp)} em "${prog}". Continuar?`);
+  return true;
+}
+function addEntrada(){
+  const ano=parseInt(document.getElementById('f-entrada-ano').value);
+  const data=document.getElementById('f-entrada-data').value;
+  const prog=document.getElementById('f-entrada-prog').value.trim();
+  const valor=parseFloat(document.getElementById('f-entrada-valor').value);
+  if(!prog) return alert('Informe o Programa / Verba.');
+  if(!valor||valor<=0) return alert('Informe um valor válido.');
+  state.data[state.currentConta].push({id:state.nextIds[state.currentConta]++,ano,data:data||today(),tipo:'entrada',programa:prog,fornecedor:'',descricao:'Aporte recebido',valor,imposto:0});
+  document.getElementById('f-entrada-valor').value='';
+  saveState(); refresh(); showToast('✅ Entrada registrada e salva!');
+}
+function addSaida(){
+  const data=document.getElementById('f-saida-data').value;
+  const prog=document.getElementById('f-saida-prog').value;
+  const forn=document.getElementById('f-saida-forn').value.trim();
+  const desc=document.getElementById('f-saida-desc').value.trim();
+  const valor=parseFloat(document.getElementById('f-saida-valor').value);
+  const imposto=parseFloat(document.getElementById('f-saida-imposto').value)||0;
+  if(!prog) return alert('Selecione a verba a debitar.');
+  if(!valor||valor<=0) return alert('Informe um valor válido.');
+  if(!_checkSaldo(prog,valor,imposto)) return;
+  state.data[state.currentConta].push({id:state.nextIds[state.currentConta]++,ano:new Date().getFullYear(),data:data||today(),tipo:'saida',programa:prog,fornecedor:forn,descricao:desc||'Despesa',valor,imposto});
+  ['f-saida-forn','f-saida-desc','f-saida-valor','f-saida-imposto'].forEach(id=>document.getElementById(id).value='');
+  saveState(); refresh(); showToast('✅ Saída registrada e salva!');
+}
+function addEntradaModal(){
+  const ano=parseInt(document.getElementById('m-entrada-ano').value);
+  const data=document.getElementById('m-entrada-data').value;
+  const prog=document.getElementById('m-entrada-prog').value.trim();
+  const valor=parseFloat(document.getElementById('m-entrada-valor').value);
+  if(!prog) return alert('Informe o Programa / Verba.');
+  if(!valor||valor<=0) return alert('Informe um valor válido.');
+  state.data[state.currentConta].push({id:state.nextIds[state.currentConta]++,ano,data:data||today(),tipo:'entrada',programa:prog,fornecedor:'',descricao:'Aporte recebido',valor,imposto:0});
+  document.getElementById('m-entrada-valor').value=''; document.getElementById('m-entrada-prog').value='';
+  closeModal('entrada'); saveState(); refresh(); showToast('✅ Entrada registrada e salva!');
+}
+function addSaidaModal(){
+  const data=document.getElementById('m-saida-data').value;
+  const prog=document.getElementById('m-saida-prog').value;
+  const forn=document.getElementById('m-saida-forn').value.trim();
+  const desc=document.getElementById('m-saida-desc').value.trim();
+  const valor=parseFloat(document.getElementById('m-saida-valor').value);
+  const imposto=parseFloat(document.getElementById('m-saida-imposto').value)||0;
+  if(!prog) return alert('Selecione a verba a debitar.');
+  if(!valor||valor<=0) return alert('Informe um valor válido.');
+  if(!_checkSaldo(prog,valor,imposto)) return;
+  state.data[state.currentConta].push({id:state.nextIds[state.currentConta]++,ano:new Date().getFullYear(),data:data||today(),tipo:'saida',programa:prog,fornecedor:forn,descricao:desc||'Despesa',valor,imposto});
+  ['m-saida-forn','m-saida-desc','m-saida-valor','m-saida-imposto'].forEach(id=>document.getElementById(id).value='');
+  closeModal('saida'); saveState(); refresh(); showToast('✅ Saída registrada e salva!');
+}
+function deleteTx(id){
+  if(!confirm('Confirma a exclusão deste registro?')) return;
+  state.data[state.currentConta]=state.data[state.currentConta].filter(t=>t.id!==id);
+  saveState(); refresh(); showToast('🗑️ Registro excluído.');
+}
+
+// ═══════════════════════════════════════════════════════
+// GERENCIAR CONTAS
+// ═══════════════════════════════════════════════════════
+function renderAccList(){
+  const el=document.getElementById('acc-list-render'); if(!el) return;
+  el.innerHTML=state.contas.map(c=>{
+    const p=getPrograms(c.id);
+    const e=Object.values(p).reduce((a,v)=>a+v.entrada,0);
+    const s=Object.values(p).reduce((a,v)=>a+v.saida,0);
+    const sd=e-s;
+    const isActive=c.id===state.currentConta;
+    return `<div class="acc-list-item ${isActive?'active-item':''}">
+      <div class="acc-list-item-info">
+        <div class="acc-list-item-name">${c.nome}${isActive?' <span style="font-size:10px;color:var(--teal);">(ativa)</span>':''}</div>
+        <div class="acc-list-item-num">Nº ${c.numero}</div>
+        ${e>0?`<div class="acc-list-item-saldo">${fmt(sd)}</div>`:''}
+      </div>
+      <div class="acc-actions">
+        <button class="acc-edit-btn" onclick="openEditConta('${c.id}')">✏️ Editar</button>
+        ${state.contas.length>1?`<button class="acc-del-btn" onclick="deleteConta('${c.id}')">🗑️</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+function addConta(){
+  const nome=document.getElementById('nova-conta-nome').value.trim();
+  const num=document.getElementById('nova-conta-num').value.trim();
+  if(!nome) return alert('Informe o nome da conta.');
+  if(!num)  return alert('Informe o número da conta.');
+  const id='c'+Date.now();
+  state.contas.push({id,numero:num,nome});
+  state.data[id]=[]; state.nextIds[id]=1;
+  document.getElementById('nova-conta-nome').value='';
+  document.getElementById('nova-conta-num').value='';
+  saveState(); renderAccList(); renderTabs(); showToast(`✅ Conta "${nome}" adicionada!`);
+}
+function openEditConta(id){
+  const c=state.contas.find(x=>x.id===id); if(!c) return;
+  document.getElementById('edit-conta-id').value=id;
+  document.getElementById('edit-conta-nome').value=c.nome;
+  document.getElementById('edit-conta-num').value=c.numero;
+  closeModal('gerenciarContas'); openModal('editarConta');
+}
+function saveEditConta(){
+  const id=document.getElementById('edit-conta-id').value;
+  const nome=document.getElementById('edit-conta-nome').value.trim();
+  const num=document.getElementById('edit-conta-num').value.trim();
+  if(!nome) return alert('Informe o nome.'); if(!num) return alert('Informe o número.');
+  const c=state.contas.find(x=>x.id===id);
+  if(c){ c.nome=nome; c.numero=num; }
+  closeModal('editarConta'); saveState(); refresh(); showToast('✅ Conta atualizada!');
+  openModal('gerenciarContas'); renderAccList();
+}
+function deleteConta(id){
+  const c=state.contas.find(x=>x.id===id); if(!c) return;
+  const tx=(state.data[id]||[]).length;
+  if(!confirm(`Excluir "${c.nome}" (Nº ${c.numero})${tx>0?` com ${tx} movimentação(ões)`:''}? Esta ação não pode ser desfeita.`)) return;
+  state.contas=state.contas.filter(x=>x.id!==id);
+  delete state.data[id]; delete state.nextIds[id];
+  if(state.currentConta===id) state.currentConta=state.contas[0].id;
+  saveState(); renderAccList(); refresh(); showToast('🗑️ Conta excluída.');
+}
+
+// ═══════════════════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════════════════
+function openModal(tipo){ if(tipo==='gerenciarContas') renderAccList(); document.getElementById('modal-'+tipo).classList.add('open'); }
+function closeModal(tipo){ document.getElementById('modal-'+tipo).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); }));
+
+// ═══════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════
+let toastTimer=null;
+function showToast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'),2800); }
+
+// ═══════════════════════════════════════════════════════
+// REFRESH + INIT
+// ═══════════════════════════════════════════════════════
+function refresh(){ renderTabs(); updateDataLists(); renderKPIs(); renderTable(); }
+
+loadState();
+['f-entrada-data','f-saida-data','m-entrada-data','m-saida-data'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=today(); });
+refresh();
+</script>
+</body>
+</html>
